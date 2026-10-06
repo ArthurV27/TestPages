@@ -1,0 +1,255 @@
+<%- include('../partials/layout-start',{title}) %>
+
+<div class="page-header">
+
+  <div>
+    <span class="eyebrow">LIBRARIAN</span>
+
+    <h1>Issue a Book</h1>
+
+    <p>
+      Select an active student, choose an available book,
+      and set the due date.
+    </p>
+  </div>
+
+  <a
+    class="btn"
+    href="/librarian/dashboard"
+  >
+    ← Back to dashboard
+  </a>
+
+</div>
+
+
+<section class="panel">
+
+  <div class="panel-head">
+
+    <div>
+      <h2>Book Issue Form</h2>
+
+      <p>
+        Only active students and available books are listed.
+      </p>
+    </div>
+
+  </div>
+
+
+  <form
+    method="post"
+    action="/librarian/borrow"
+    class="form"
+  >
+
+    <div class="form-grid">
+
+
+      <!-- STUDENT -->
+
+      <label class="span-2">
+
+        Student
+
+        <select
+          name="student_id"
+          required
+        >
+
+          <option value="">
+            Select student
+          </option>
+
+          <% students.forEach(student => { %>
+
+            <option value="<%= student.id %>">
+              <%= student.name %>
+              — <%= student.student_number %>
+            </option>
+
+          <% }) %>
+
+        </select>
+
+      </label>
+
+
+      <!-- BOOK -->
+
+      <label class="span-2">
+
+        Book
+
+        <select
+          name="book_id"
+          id="bookSelect"
+          required
+        >
+
+          <option value="">
+            Select available book
+          </option>
+
+          <% books.forEach(book => { %>
+
+            <option
+              value="<%= book.id %>"
+              data-available="<%= book.available_quantity %>"
+            >
+              <%= book.title %>
+              — <%= book.book_code %>
+              — <%= book.available_quantity %>
+              available
+            </option>
+
+          <% }) %>
+
+        </select>
+
+      </label>
+
+
+      <!-- AVAILABILITY -->
+
+      <div
+        class="span-2"
+        id="availabilityMessage"
+      >
+        <span class="muted">
+          Select a book to see its available quantity.
+        </span>
+      </div>
+
+
+      <!-- DUE DATE -->
+
+      <label>
+
+        Due Date
+
+        <input
+          type="date"
+          name="due_date"
+          id="dueDate"
+          required
+        >
+
+        <small class="hint">
+          The due date cannot be earlier than today.
+        </small>
+
+      </label>
+
+
+      <!-- NOTES -->
+
+      <label>
+
+        Notes
+
+        <input
+          type="text"
+          name="notes"
+          maxlength="255"
+          placeholder="Optional"
+        >
+
+      </label>
+
+
+    </div>
+
+
+    <div class="modal-actions">
+
+      <a
+        class="btn"
+        href="/librarian/dashboard"
+      >
+        Cancel
+      </a>
+
+      <button
+        class="btn btn-primary"
+        type="submit"
+        id="issueButton"
+      >
+        Issue Book
+      </button>
+
+    </div>
+
+  </form>
+
+</section>
+
+
+<script>
+
+  const dueDate = document.getElementById('dueDate');
+  const bookSelect = document.getElementById('bookSelect');
+  const availabilityMessage =
+    document.getElementById('availabilityMessage');
+  const issueButton =
+    document.getElementById('issueButton');
+
+
+  const today = new Date()
+    .toISOString()
+    .split('T')[0];
+
+
+  dueDate.min = today;
+
+
+  bookSelect.addEventListener('change', () => {
+
+    const option =
+      bookSelect.options[bookSelect.selectedIndex];
+
+
+    if (!bookSelect.value) {
+
+      availabilityMessage.innerHTML =
+        '<span class="muted">Select a book to see its available quantity.</span>';
+
+      issueButton.disabled = true;
+
+      return;
+    }
+
+
+    const available =
+      Number(option.dataset.available);
+
+
+    if (available < 1) {
+
+      availabilityMessage.innerHTML =
+        '<span class="badge borrowed">Out of stock</span>';
+
+      issueButton.disabled = true;
+
+      return;
+    }
+
+
+    availabilityMessage.innerHTML =
+      '<span class="badge available">' +
+      available +
+      ' copy/copies available' +
+      '</span>';
+
+    issueButton.disabled = false;
+
+  });
+
+
+  issueButton.disabled = true;
+
+</script>
+
+
+<%- include('../partials/layout-end') %>

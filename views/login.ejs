@@ -1,0 +1,230 @@
+<%- include('partials/head',{title}) %>
+
+<%- include('partials/toast') %>
+
+<div class="login-page">
+
+  <section class="login-hero">
+
+    <div class="hero-copy">
+
+      <span class="eyebrow">DIGITAL LIBRARY</span>
+
+      <h1>
+        Your books,<br>
+        <em>organized.</em>
+      </h1>
+
+      <p>
+        A lightweight library workspace for librarians and students—
+        fast catalog discovery, simple borrowing, and clear due-date tracking.
+      </p>
+
+      <div class="feature-row">
+        <span>✓ Live availability</span>
+        <span>✓ Overdue alerts</span>
+        <span>✓ Simple reports</span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="login-card">
+
+    <div class="login-heading">
+
+      <span class="brand-mark">L</span>
+
+      <h2>Welcome back</h2>
+
+      <p>Choose your role to continue.</p>
+
+    </div>
+
+
+    <form
+      method="post"
+      action="/login"
+      id="loginForm"
+    >
+
+      <div class="role-tabs three-roles">
+
+        <label>
+          <input
+            type="radio"
+            name="role"
+            value="student"
+            checked
+          >
+          <span>Student</span>
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="role"
+            value="librarian"
+          >
+          <span>Librarian</span>
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="role"
+            value="admin"
+          >
+          <span>Admin</span>
+        </label>
+
+      </div>
+
+
+      <label>
+        Full Name
+
+        <input
+          name="name"
+          required
+          placeholder="e.g. Maria Santos"
+          autocomplete="name"
+        >
+      </label>
+
+
+      <div id="studentFields">
+
+        <label>
+          Student Number
+
+          <input
+            name="student_number"
+            id="studentNumber"
+            placeholder="e.g. 2024-0001"
+            autocomplete="username"
+          >
+        </label>
+
+        <p class="hint">
+          Demo student:
+          <strong>Juan Dela Cruz</strong>
+          ·
+          <strong>2024-0001</strong>
+        </p>
+
+      </div>
+
+
+      <div id="passwordFields">
+
+        <label>
+          Password
+
+          <input
+            name="password"
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+          >
+        </label>
+
+      </div>
+
+
+      <button
+        class="btn btn-primary btn-wide"
+        type="submit"
+      >
+        Continue →
+      </button>
+
+    </form>
+
+
+    <p class="login-note">
+
+      <a href="/register">
+        New student? Register here →
+      </a>
+
+      <br>
+      <br>
+
+      For classroom/demo use.
+
+    </p>
+
+  </section>
+
+</div>
+
+
+<script>
+
+  const roles =
+    document.querySelectorAll('input[name="role"]');
+
+  const studentFields =
+    document.getElementById('studentFields');
+
+  const studentNumber =
+    document.getElementById('studentNumber');
+
+  const password =
+    document.getElementById('password');
+
+
+  function sync() {
+
+    const role =
+      document.querySelector(
+        'input[name="role"]:checked'
+      )?.value;
+
+
+    const isStudent =
+      role === 'student';
+
+
+    studentFields.hidden =
+      !isStudent;
+
+
+    studentNumber.required =
+      isStudent;
+
+
+    password.required =
+      true;
+
+
+    if (isStudent) {
+
+      password.placeholder =
+        'Enter your student password';
+
+    } else {
+
+      password.placeholder =
+        'Enter your password';
+
+    }
+
+  }
+
+
+  roles.forEach(role => {
+    role.addEventListener('change', sync);
+  });
+
+
+  sync();
+
+</script>
+
+</body>
+</html>

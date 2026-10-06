@@ -1,0 +1,353 @@
+<%- include('../partials/layout-start',{title}) %>
+
+<div class="page-header">
+  <div>
+    <span class="eyebrow">ADMIN</span>
+    <h1>User management.</h1>
+    <p>Manage librarians and registered student borrowers.</p>
+  </div>
+
+  <button class="btn btn-primary" data-modal-open="librarianModal">
+    + Add librarian
+  </button>
+</div>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>All users</h2>
+      <p>Search by name, student number, course or role.</p>
+    </div>
+
+    <input
+      class="table-search"
+      data-table-search="usersTable"
+      placeholder="Search users…"
+    >
+  </div>
+
+  <div class="table-wrap">
+    <table id="usersTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>Student Details</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <% users.forEach(u => { %>
+          <tr>
+            <td>
+              <strong><%= u.name %></strong>
+              <small><%= u.email || 'No email' %></small>
+            </td>
+
+            <td>
+              <span class="tag"><%= u.role %></span>
+            </td>
+
+            <td>
+              <% if (u.role === 'student') { %>
+                <strong><%= u.student_number %></strong>
+
+                <small>
+                  <%= u.course %> · Year <%= u.year_level %> · Sec. <%= u.section %><br>
+                  School ID: <%= u.school_id %>
+                </small>
+              <% } else { %>
+                <span class="muted">Staff account</span>
+              <% } %>
+            </td>
+
+            <td>
+              <%= u.contact_number || '—' %>
+            </td>
+
+            <td>
+              <span class="badge <%= u.status %>">
+                <%= u.status %>
+              </span>
+            </td>
+
+            <td>
+              <div class="inline-actions">
+                <button
+                  class="btn btn-small"
+                  data-modal-open="editUser<%= u.id %>"
+                >
+                  Edit
+                </button>
+
+                <% if (u.id !== currentUser.id) { %>
+                  <form
+                    method="post"
+                    action="/admin/users/<%= u.id %>/status"
+                  >
+                    <input
+                      type="hidden"
+                      name="status"
+                      value="<%= u.status === 'active' ? 'inactive' : 'active' %>"
+                    >
+
+                    <button
+                      class="btn btn-small btn-ghost"
+                      type="submit"
+                      data-confirm="Change this user's status?"
+                    >
+                      <%= u.status === 'active' ? 'Deactivate' : 'Activate' %>
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<% users.forEach(u => { %>
+  <div class="modal" id="editUser<%= u.id %>">
+    <div class="modal-card">
+      <button class="modal-close" data-modal-close>×</button>
+
+      <h2>Edit <%= u.name %></h2>
+
+      <form
+        method="post"
+        action="/admin/users/<%= u.id %>/update"
+      >
+        <label>
+          Name
+          <input
+            name="name"
+            value="<%= u.name %>"
+            required
+          >
+        </label>
+
+        <div class="form-grid two">
+          <label>
+            Email
+            <input
+              type="email"
+              name="email"
+              value="<%= u.email || '' %>"
+            >
+          </label>
+
+          <label>
+            Contact Number
+            <input
+              type="tel"
+              name="contact_number"
+              value="<%= u.contact_number || '' %>"
+              placeholder="09123456789"
+              pattern="^09\d{9}$"
+              minlength="11"
+              maxlength="11"
+              inputmode="numeric"
+              oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"
+            >
+          </label>
+        </div>
+
+        <% if (u.role === 'student') { %>
+
+          <div class="form-grid two">
+            <label>
+              School ID
+              <input
+                name="school_id"
+                value="<%= u.school_id || '' %>"
+                required
+              >
+            </label>
+
+            <label>
+              School Year
+              <input
+                name="school_year"
+                value="<%= u.school_year || '' %>"
+              >
+            </label>
+          </div>
+
+          <label>
+            Course
+            <select name="course" required>
+              <% courses.forEach(c => { %>
+                <option
+                  value="<%= c %>"
+                  <%= c === u.course ? 'selected' : '' %>
+                >
+                  <%= c %>
+                </option>
+              <% }) %>
+            </select>
+          </label>
+
+          <div class="form-grid two">
+            <label>
+              Year Level
+              <select name="year_level" required>
+                <% [1,2,3,4,5,6].forEach(y => { %>
+                  <option
+                    value="<%= y %>"
+                    <%= y === u.year_level ? 'selected' : '' %>
+                  >
+                    <%= y %>
+                  </option>
+                <% }) %>
+              </select>
+            </label>
+
+            <label>
+              Section
+              <input
+                name="section"
+                value="<%= u.section || '' %>"
+                required
+              >
+            </label>
+          </div>
+
+        <% } %>
+
+        <button
+          class="btn btn-primary btn-wide"
+          type="submit"
+        >
+          Save changes
+        </button>
+      </form>
+    </div>
+  </div>
+<% }) %>
+
+<div class="modal" id="librarianModal">
+  <div class="modal-card">
+    <button class="modal-close" data-modal-close>×</button>
+
+    <h2>Add librarian</h2>
+
+    <p class="hint">
+      Philippine cellphone number must be 11 digits and start with 09.
+    </p>
+
+    <p class="hint">
+      Password must be at least 10 characters and must match the confirmation.
+    </p>
+
+    <form
+      method="post"
+      action="/admin/librarians"
+      id="librarianForm"
+    >
+      <div class="form-grid two">
+        <label>
+          First Name *
+          <input
+            name="first_name"
+            required
+          >
+        </label>
+
+        <label>
+          Last Name *
+          <input
+            name="last_name"
+            required
+          >
+        </label>
+      </div>
+
+      <div class="form-grid two">
+        <label>
+          Email
+          <input
+            type="email"
+            name="email"
+          >
+        </label>
+
+        <label>
+          Contact Number
+          <input
+            type="tel"
+            name="contact_number"
+            placeholder="09123456789"
+            pattern="^09\d{9}$"
+            minlength="11"
+            maxlength="11"
+            inputmode="numeric"
+            oninput="this.value=this.value.replace(/\D/g,'').slice(0,11)"
+          >
+        </label>
+      </div>
+
+      <label>
+        Password *
+        <input
+          type="password"
+          name="password"
+          id="librarianPassword"
+          minlength="10"
+          required
+          autocomplete="new-password"
+        >
+      </label>
+
+      <label>
+        Confirm Password *
+        <input
+          type="password"
+          name="confirm_password"
+          id="librarianConfirmPassword"
+          minlength="10"
+          required
+          autocomplete="new-password"
+        >
+      </label>
+
+      <button
+        class="btn btn-primary btn-wide"
+        type="submit"
+      >
+        Create librarian
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+  const librarianForm = document.getElementById('librarianForm');
+  const librarianPassword = document.getElementById('librarianPassword');
+  const librarianConfirmPassword = document.getElementById('librarianConfirmPassword');
+
+  function checkLibrarianPasswords() {
+    if (librarianConfirmPassword.value === '') {
+      librarianConfirmPassword.setCustomValidity('');
+      return;
+    }
+
+    if (librarianPassword.value !== librarianConfirmPassword.value) {
+      librarianConfirmPassword.setCustomValidity('Passwords do not match.');
+    } else {
+      librarianConfirmPassword.setCustomValidity('');
+    }
+  }
+
+  librarianPassword.addEventListener('input', checkLibrarianPasswords);
+  librarianConfirmPassword.addEventListener('input', checkLibrarianPasswords);
+
+  librarianForm.addEventListener('submit', checkLibrarianPasswords);
+</script>
+
+<%- include('../partials/layout-end') %>

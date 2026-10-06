@@ -1,0 +1,155 @@
+<%- include('../partials/layout-start',{title}) %>
+
+<div class="page-header">
+  <div>
+    <span class="eyebrow">CATALOG</span>
+    <h1>Find a book</h1>
+    <p>Search by title, author, category, or book ID.</p>
+  </div>
+</div>
+
+<div class="catalog-toolbar">
+  <input
+    class="search"
+    id="catalogSearch"
+    placeholder="⌕ Search the catalog…"
+  >
+
+  <select id="categoryFilter">
+    <option value="">All categories</option>
+
+    <% [...new Set(books.map(b => b.category))].sort().forEach(c => { %>
+      <option><%= c %></option>
+    <% }) %>
+  </select>
+</div>
+
+<div class="book-grid" id="catalogGrid">
+
+  <% books.forEach(b => { %>
+
+    <article
+      class="book-card catalog-card"
+      data-search="<%= b.title+' '+b.author+' '+b.category+' '+b.book_code %>"
+      data-category="<%= b.category %>"
+    >
+
+      <div class="book-cover large">
+        <%= b.title.charAt(0) %>
+      </div>
+
+      <div class="book-card-body">
+
+        <div class="tag-row">
+          <span class="tag">
+            <%= b.category %>
+          </span>
+
+          <span
+            class="badge <%= b.available_quantity > 0 ? 'available' : 'borrowed' %>"
+          >
+            <%= b.available_quantity > 0 ? 'Available' : 'Out of stock' %>
+          </span>
+        </div>
+
+        <h3><%= b.title %></h3>
+
+        <p><%= b.author %></p>
+
+        <small>
+          <%= b.book_code %> ·
+          <%= b.available_quantity %> available of
+          <%= b.quantity %> total
+        </small>
+
+        <button
+          class="btn btn-small btn-primary btn-wide"
+          data-book='<%- JSON.stringify(b) %>'
+          <%= b.available_quantity < 1 ? 'disabled' : '' %>
+        >
+          <%= b.available_quantity > 0 ? 'Borrow' : 'Unavailable' %>
+        </button>
+
+      </div>
+    </article>
+
+  <% }) %>
+
+</div>
+
+<div
+  class="empty-state hidden"
+  id="catalogEmpty"
+>
+  <div class="empty-icon">⌕</div>
+  <h2>No matching books</h2>
+  <p>Try a different title, author, or category.</p>
+</div>
+
+<div
+  class="modal"
+  id="borrowModal"
+>
+  <div class="modal-card">
+
+    <button
+      class="modal-close"
+      data-close
+    >
+      ×
+    </button>
+
+    <span class="eyebrow">BORROW BOOK</span>
+
+    <h2 id="borrowTitle">Book</h2>
+
+    <p
+      id="borrowMeta"
+      class="muted"
+    ></p>
+
+    <form
+      method="post"
+      id="borrowForm"
+    >
+      <label>
+        Due date
+
+        <input
+          type="date"
+          name="due_date"
+          id="studentDueDate"
+          required
+        >
+
+        <span class="hint">
+          Choose a date from today onward.
+        </span>
+      </label>
+
+      <div class="modal-actions">
+
+        <button
+          class="btn"
+          type="button"
+          data-close
+        >
+          Cancel
+        </button>
+
+        <button
+          class="btn btn-primary"
+          type="submit"
+        >
+          Confirm borrow
+        </button>
+
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<script src="/js/catalog.js"></script>
+
+<%- include('../partials/layout-end') %>
